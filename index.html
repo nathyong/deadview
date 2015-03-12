@@ -1,0 +1,67 @@
+<html>
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <title>let's get it done!!!</title>
+    <script type="text/javascript" src="minified-src.js"></script>
+    <script type="text/javascript">
+var MINI = require('minified');
+var $ = MINI.$, HTML = MINI.HTML;
+$(function() {
+    var workItems = [];
+    //quick hack function to ensure dates actually, well, sort
+    var sort_dates_asc = function(d1, d2) {
+        return d1 > d2 ? 1 : d2 < d1 ? -1 : 0;
+    };
+    function addItem(i){
+        console.log(i.deadline);
+        console.log(i.description);
+        var deadline = new Date(i.deadline);
+        if (!(deadline instanceof Date && isFinite(deadline))) {
+            console.log("Invalid date!");
+            return;
+        }
+        if (new Date().getTimezoneOffset() !== deadline.getTimezoneOffset()) {
+            deadline.setMinutes(deadline.getMinutes()
+                    - deadline.getTimezoneOffset()
+                    + new Date().getTimezoneOffset());
+        }
+        i.deadline = deadline;
+        console.log(deadline);
+        var newItem = HTML('<li>{{description}}: {{deadline}}</li>', i);
+        $('#itemList').add(newItem);
+    };
+    if (localStorage['workItems']) {
+        workItems = JSON.parse(localStorage['workItems']);
+        workItems.map(addItem)
+    }
+    $('#itemForm').on('submit', function() { 
+        var i = $('#itemForm').values();
+        addItem(i);
+        $('#itemForm input').set('value', '');
+        localStorage['workItems'] = JSON.stringify(workItems);
+    });
+});
+    </script>
+    <style type="text/css">
+body {
+    margin: 0 auto;
+    text-align: center;
+}
+    </style>
+</head>
+<body>
+    <h1>i take my work and butcher it into little pieces</h1>
+    <div id="input">
+        <p><center>use yyyy/mm/dd format</center></p>
+        <form id="itemForm">
+            <input name="description" placeholder="assignment description" autocomplete="off" />
+            <input name="deadline" type="date" placeholder="deadline" />
+            <button type="submit">let's get it done!!!</button>
+        </form>
+    </div>
+    <div id="items">
+        <ul id="itemList">
+        </ul>
+    </div>
+</body>
+</html>
